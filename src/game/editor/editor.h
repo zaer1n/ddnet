@@ -840,6 +840,10 @@ public:
 	void AddTileart(bool IgnoreHistory = false);
 	void TileartCheckColors();
 
+	void DrawLine(ivec2 P1, ivec2 P2, int Stroke, CTile Tile = {TILE_SOLID});
+	void DrawCircle(ivec2 o, int r, int Stroke, CTile Tile = {TILE_SOLID});
+	void DrawPolygon(ivec2 o, int r, int Sides, int Stroke, CTile = {TILE_SOLID});
+
 	void PlaceBorderTiles();
 
 	void UpdateTooltip(const void *pId, const CUIRect *pRect, const char *pToolTip);
@@ -899,6 +903,7 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupTune(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupAddShape(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupProofMode(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupAnimateSettings(void *pContext, CUIRect View, bool Active);

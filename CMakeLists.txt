@@ -2511,6 +2511,7 @@ if(CLIENT)
     quick_action.h
     quick_actions.cpp
     quick_actions.h
+    shapes.cpp
     smooth_value.cpp
     smooth_value.h
     tileart.cpp

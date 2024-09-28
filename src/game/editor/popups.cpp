@@ -201,6 +201,15 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
+	static int s_AddShapeButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_AddShapeButton, "Add shape", 0, &Slot, 0, "Add shapes"))
+	{
+		static SPopupMenuId s_PopupShapeId;
+		pEditor->Ui()->DoPopupMenu(&s_PopupShapeId, Slot.x, Slot.y + Slot.h, 120, 50, pEditor, PopupAddShape);
+	}
+
 	return CUi::POPUP_KEEP_OPEN;
 }
 
@@ -2749,6 +2758,227 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, nullptr))
 	{
 		pEditor->MapView()->SetWorldOffset({32.0f * s_GotoPos.x + 0.5f, 32.0f * s_GotoPos.y + 0.5f});
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+static CUi::EPopupMenuFunctionResult PopupAddLine(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	enum
+	{
+		PROP_ORIGIN_X = 0,
+		PROP_ORIGIN_Y,
+		PROP_TARGET_X,
+		PROP_TARGET_Y,
+		PROP_STROKE,
+		NUM_PROPS,
+	};
+
+	static ivec2 s_Origin(0, 0);
+	static ivec2 s_Target(0, 0);
+	static int s_Stroke = 1;
+
+	CProperty aProps[] = {
+		{"X1", s_Origin.x, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Y1", s_Origin.y, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"X2", s_Target.x, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Y2", s_Target.y, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Stroke", s_Stroke, PROPTYPE_INT, 1, 100},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+
+	switch (Prop)
+	{
+		case PROP_ORIGIN_X:
+			s_Origin.x = NewVal;
+			break;
+		case PROP_ORIGIN_Y:
+			s_Origin.y = NewVal;
+			break;
+		case PROP_TARGET_X:
+			s_Target.x = NewVal;
+			break;
+		case PROP_TARGET_Y:
+			s_Target.y = NewVal;
+			break;
+		case PROP_STROKE:
+			s_Stroke = NewVal;
+			break;
+		default:
+			break;
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static int s_Button;
+	if(pEditor->DoButton_Editor(&s_Button, "Add", 0, &Button, 0, nullptr))
+	{
+		pEditor->DrawLine(s_Origin, s_Target, s_Stroke);
+
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+static CUi::EPopupMenuFunctionResult PopupAddCircle(void *pContext, CUIRect View, bool Active) 
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	enum
+	{
+		PROP_CENTER_X = 0,
+		PROP_CENTER_Y,
+		PROP_RADIUS,
+		PROP_STROKE,
+		NUM_PROPS,
+	};
+	static int s_Radius = 0;
+	static ivec2 s_Center(0, 0);
+	static int s_Stroke = 1;
+
+	CProperty aProps[] = {
+		{"Center X", s_Center.x, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Center Y", s_Center.y, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Radius", s_Radius, PROPTYPE_INT, 1, std::numeric_limits<int>::max()},
+		{"Stroke", s_Stroke, PROPTYPE_INT, 1, 100},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+
+	switch (Prop)
+	{
+		case PROP_CENTER_X:
+			s_Center.x = NewVal;
+			break;
+		case PROP_CENTER_Y:
+			s_Center.y = NewVal;
+			break;
+		case PROP_RADIUS:
+			s_Radius = NewVal;
+			break;
+		case PROP_STROKE:
+			s_Stroke = NewVal;
+			break;
+		default:
+			break;
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static int s_Button;
+	if(pEditor->DoButton_Editor(&s_Button, "Add", 0, &Button, 0, nullptr))
+	{
+		pEditor->DrawCircle(s_Center, s_Radius, s_Stroke);
+
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+static CUi::EPopupMenuFunctionResult PopupAddPolygon(void *pContext, CUIRect View, bool Active) 
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	enum
+	{
+		PROP_CENTER_X = 0,
+		PROP_CENTER_Y,
+		PROP_RADIUS,
+		PROP_SIDES,
+		PROP_STROKE,
+		NUM_PROPS,
+	};
+
+	static ivec2 s_Center(0, 0);
+	static int s_Radius = 0;
+	static int s_Sides = 3;
+	static int s_Stroke = 1;
+
+	CProperty aProps[] = {
+		{"Center X", s_Center.x, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Center Y", s_Center.y, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Radius", s_Radius, PROPTYPE_INT, 1, std::numeric_limits<int>::max()},
+		{"Sides", s_Sides, PROPTYPE_INT, 3, 50},
+		{"Stroke", s_Stroke, PROPTYPE_INT, 1, 50},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+
+	switch (Prop)
+	{
+		case PROP_CENTER_X:
+			s_Center.x = NewVal;
+			break;
+		case PROP_CENTER_Y:
+			s_Center.y = NewVal;
+			break;
+		case PROP_RADIUS:
+			s_Radius = NewVal;
+			break;
+		case PROP_SIDES:
+			s_Sides = NewVal;
+			break;
+		case PROP_STROKE:
+			s_Stroke = NewVal;
+			break;
+		default:
+			break;
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static int s_Button;
+	if(pEditor->DoButton_Editor(&s_Button, "Add", 0, &Button, 0, nullptr))
+	{
+		pEditor->DrawPolygon(s_Center, s_Radius, s_Sides, s_Stroke);
+
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+CUi::EPopupMenuFunctionResult CEditor::PopupAddShape(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	CUIRect Slot;
+
+	static int s_LineButton = 0;
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_LineButton, "Line", 0, &Slot, 0, "Add a line"))
+	{
+		static SPopupMenuId s_PopupLineId;
+		pEditor->Ui()->DoPopupMenu(&s_PopupLineId, Slot.x, Slot.y + Slot.h, 120, 100, pEditor, PopupAddLine);
+	}
+
+	static int s_CircleButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_CircleButton, "Circle", 0, &Slot, 0, "Add a circle"))
+	{
+		static SPopupMenuId s_PopupCircleId;
+		pEditor->Ui()->DoPopupMenu(&s_PopupCircleId, Slot.x, Slot.y + Slot.h, 120, 100, pEditor, PopupAddCircle);
+	}
+
+	static int s_PolygonButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_PolygonButton, "Polygon", 0, &Slot, 0, "Add a polygon"))
+	{
+		static SPopupMenuId s_PopupPolygonId;
+		pEditor->Ui()->DoPopupMenu(&s_PopupPolygonId, Slot.x, Slot.y + Slot.h, 120, 100, pEditor, PopupAddPolygon);
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
